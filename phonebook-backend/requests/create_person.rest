@@ -1,0 +1,10 @@
+POST http://localhost:3005/api/persons
+Content-Type: application/json;charset=utf-8
+
+{
+  "name": "John",
+  "number": "0200940008"
+}
+
+###
+GET http://localhost:3005/api/persons
