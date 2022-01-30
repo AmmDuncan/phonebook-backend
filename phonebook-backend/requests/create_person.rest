@@ -7,4 +7,13 @@ Content-Type: application/json;charset=utf-8
 }
 
 ###
-GET http://localhost:3005/api/persons
+PUT http://localhost:3005/api/persons/61f5bc628ebf0ed69d7b7f0d
+Content-Type: application/json;charset=utf-8
+
+{
+  "name": "Ammiel Yawson",
+  "number": "0558249492"
+}
+
+###
+GET http://localhost:3005/api/persons/61f5bc628ebf0ed69d7b7f0d
