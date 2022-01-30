@@ -28,17 +28,27 @@ app.get("/info", async (req, res) => {
   res.status(200).send(body);
 });
 
-app.post("/api/persons", async (req, res) => {
+app.post("/api/persons", async (req, res, next) => {
   const body = req.body;
-  if (!body.name || !body.number) {
-    res.status(400).json({ error: "name or number missing" }).end();
+  try {
+    if (!body.name || !body.number) {
+      res.status(400).json({ error: "name or number missing" }).end();
+    }
+    const found = await Person.findOne({ name: { $eq: body.name } });
+    if (found) {
+      return res
+        .status(400)
+        .json({ error: `${body.name} already exists, try updating instead` });
+    }
+    const person = new Person({
+      name: body.name,
+      number: body.number,
+    });
+    const savedPerson = await person.save();
+    res.status(201).send(savedPerson);
+  } catch (e) {
+    next(e);
   }
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
-  const savedPerson = await person.save();
-  res.status(201).send(savedPerson);
 });
 
 app.get("/api/persons", async (req, res) => {
@@ -67,7 +77,7 @@ app.put("/api/persons/:id", async (req, res, next) => {
     const updatedPerson = await Person.findByIdAndUpdate(
       id,
       { number: req.body.number },
-      { new: true }
+      { new: true, runValidators: true }
     );
     res.status(200).send(updatedPerson.toJSON());
   } catch (e) {
@@ -75,18 +85,21 @@ app.put("/api/persons/:id", async (req, res, next) => {
   }
 });
 
-app.delete("/api/persons/:id", async (req, res) => {
+app.delete("/api/persons/:id", async (req, res, next) => {
   const id = req.params.id;
   try {
     await Person.findByIdAndDelete(id);
     res.status(204).end();
   } catch (e) {
-    console.log(e);
+    next(e);
   }
 });
 
 const errorHandler = (error, req, res, next) => {
-  console.log(error);
+  console.log(error.message);
+  if (error.name === "ValidationError") {
+    return res.status(400).json({ error: error.message });
+  }
   res
     .status(400)
     .send({ error: error.message || "something unexpected happened" });
