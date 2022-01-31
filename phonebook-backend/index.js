@@ -7,7 +7,7 @@ const Person = require("./models/person");
 
 const app = express();
 
-morgan.token("body", (req, res) =>
+morgan.token("body", (req) =>
   req.method === "POST" ? JSON.stringify(req.body) : ""
 );
 
@@ -95,7 +95,7 @@ app.delete("/api/persons/:id", async (req, res, next) => {
   }
 });
 
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, req, res) => {
   console.log(error.message);
   if (error.name === "ValidationError") {
     return res.status(400).json({ error: error.message });
